@@ -67,11 +67,11 @@ function uc_concordpay_menu()
  */
 function uc_concordpay_uc_payment_method()
 {
-    $methods[] = array(
+    $methods['concord_pay'] = array(
         'id' => 'concord pay',
         'name' => t('Concord Pay Gateway'),
-        'title' => t('Оплата картой VISA или Mastercard (ConcordPay)'),
-        'desc' => t('Оплата картой VISA или Mastercard (ConcordPay)'),
+        'title' => t('Оплата картами VISA, Mastercard, GooglePay (ConcordPay)'),
+        'desc' => t('Оплата картами VISA, Mastercard, GooglePay (ConcordPay)'),
         'callback' => 'uc_concordpay_settings_form',
         'redirect' => 'uc_concordpay_redirect_form',
         'weight' => 1,
@@ -144,7 +144,7 @@ function uc_concordpay_redirect_form($form, &$form_state, $order)
         'order_id' => $order_id . concordpay::ORDER_SEPARATOR . time(),
         'amount' => $amount,
         'currency_iso' => 'UAH',
-        'description' => 'Оплата картой VISA или Mastercard',
+        'description' => 'Оплата картами VISA, Mastercard, GooglePay (ConcordPay)',
         'callback_url' => $base_url . '/' . UC_CONCORDPAY_RETURN_URL,
         'approve_url' => variable_get('cp_approve_url', ''),
         'decline_url' => variable_get('cp_decline_url', ''),
