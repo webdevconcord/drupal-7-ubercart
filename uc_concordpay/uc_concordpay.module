@@ -1,0 +1,279 @@
+<?php
+
+/**
+ * @file
+ * Processes payments using ConcordPay Payment Gateway.
+ *
+ * Developed by ConcordPay - https://concordpay.concord.ua/.
+ */
+
+include_once(__DIR__ . '/class/concordpay.php');
+
+/**
+ * Constant definitions.
+ */
+const UC_CONCORDPAY_APPROVE_URL = 'ucommerce/concordpay/success';
+const UC_CONCORDPAY_DECLINE_URL = 'ucommerce/concordpay/fail';
+const UC_CONCORDPAY_CANCEL_URL  = 'ucommerce/concordpay/cancel';
+const UC_CONCORDPAY_RETURN_URL  = 'ucommerce/concordpay/return';
+
+/**
+ * Payment page languages.
+ */
+const CP_LANGUAGES = array(
+  'ru' => 'ru',
+  'uk' => 'uk',
+  'en' => 'en'
+);
+
+/**
+ * Implements hook_menu()
+ */
+function uc_concordpay_menu()
+{
+    $items = array();
+    // This is a server-server communication page.
+    $items[UC_CONCORDPAY_RETURN_URL] = array(
+        'title'            => 'Callback for ConcordPay Gateway',
+        'page callback'    => 'uc_concordpay_page_callback',
+        'access arguments' => ['access content'],
+        'page arguments'   => [],
+        'access callback'  => TRUE,
+        'type'             => MENU_CALLBACK,
+        'file'             => 'uc_concordpay.pages.inc',
+    );
+
+    // Payer will be redirected to this page after the payment.
+    $items[UC_CONCORDPAY_APPROVE_URL] = [
+      'title'            => t('Successful payment'),
+      'page callback'    => 'uc_concordpay_success',
+      'access arguments' => ['access content'],
+      'type'             => MENU_CALLBACK,
+      'file'             => 'uc_concordpay.pages.inc',
+    ];
+
+    $items[UC_CONCORDPAY_DECLINE_URL] = [
+      'title'            => t('Unsuccessful payment'),
+      'page callback'    => 'uc_concordpay_fail',
+      'access arguments' => ['access content'],
+      'type'             => MENU_CALLBACK,
+      'file'             => 'uc_concordpay.pages.inc',
+    ];
+
+    $items[UC_CONCORDPAY_CANCEL_URL] = [
+      'title'            => t('Canceled payment'),
+      'page callback'    => 'uc_concordpay_cancel',
+      'access arguments' => ['access content'],
+      'type'             => MENU_CALLBACK,
+      'file'             => 'uc_concordpay.pages.inc',
+    ];
+
+    return $items;
+}
+
+/**
+ * Implements hook_uc_payment_method().
+ */
+function uc_concordpay_uc_payment_method()
+{
+    $methods['concordpay'] = array(
+        'id'       => 'concordpay',
+        'name'     => t('ConcordPay Payment Gateway'),
+        'title'    => theme('uc_concordpay_payment_method_title'),
+        'desc'     => t('Payment Visa, Mastercard, Apple Pay, Google Pay'),
+        'callback' => 'uc_concordpay_settings_form',
+        'redirect' => 'uc_concordpay_redirect_form',
+        'weight'   => 1,
+        'checkout' => TRUE,
+    );
+
+    return $methods;
+}
+
+/**
+ * @param $op
+ * @param $order
+ * @param null $form
+ * @param null $form_state
+ * @param null $settings
+ * @return array|null
+ */
+function uc_concordpay_settings_form($op, &$order, $form = NULL, &$form_state = NULL, $settings = NULL)
+{
+    if ($op === 'settings') {
+        $form['cp_merchant_id'] = array(
+            '#type'          => 'textfield',
+            '#title'         => t('Merchant ID'),
+            '#description'   => t('Given to Merchant by ConcordPay'),
+            '#default_value' => variable_get('cp_merchant_id', ''),
+            '#required'      => TRUE
+        );
+
+        $form['cp_secret_key'] = array(
+            '#type'          => 'textfield',
+            '#title'         => t('Secret key'),
+            '#description'   => t('Given to Merchant by ConcordPay'),
+            '#default_value' => variable_get('cp_secret_key', ''),
+            '#required'      => TRUE
+        );
+
+        $form['cp_approve_order_status'] = array(
+          '#type'          => 'select',
+          '#title'         => t('Payment successful order status'),
+          '#options'       => uc_order_status_options_list(),
+          '#description'   => t('Order status after successful payment'),
+          '#default_value' => variable_get('cp_approve_order_status', concordpay::ORDER_STATUS_COMPLETED),
+        );
+
+        $form['cp_decline_order_status'] = array(
+          '#type'          => 'select',
+          '#title'         => t('Payment failed order status'),
+          '#options'       => uc_order_status_options_list(),
+          '#description'   => t('Order status after failed payment'),
+          '#default_value' => variable_get('cp_decline_order_status', concordpay::ORDER_STATUS_CANCELED),
+        );
+
+        $form['cp_refunded_order_status'] = array(
+          '#type'          => 'select',
+          '#title'         => t('Payment refunded order status'),
+          '#options'       => uc_order_status_options_list(),
+          '#description'   => t('Order status after refund payment'),
+          '#default_value' => variable_get('cp_refunded_order_status', concordpay::ORDER_STATUS_CANCELED),
+        );
+
+        $form['cp_language'] = array(
+          '#type'          => 'select',
+          '#title'         => t('Language'),
+          '#default_value' => variable_get('cp_language', 'en'),
+          '#description'   => t('Choose language of payment page'),
+          '#options'       => CP_LANGUAGES,
+          '#required'      => FALSE
+        );
+    }
+
+    return $form;
+}
+
+/**
+ * @param $form
+ * @param $form_state
+ * @param $order
+ * @return array
+ */
+function uc_concordpay_redirect_form($form, &$form_state, $order)
+{
+    global $base_url;
+
+    $concordpay  = new ConcordPay();
+    $order_id    = $order->order_id;
+    $amount      = number_format($order->order_total, 2, '.', '');
+    $description = t('Payment by card on the site') . ' ' . $base_url . ', ' .
+      $order->billing_first_name . ' ' . $order->billing_last_name . ', ' . $order->billing_phone . '.';
+
+    $approve_url = url(UC_CONCORDPAY_APPROVE_URL, ['absolute' => TRUE, ]);
+    $decline_url = url(UC_CONCORDPAY_DECLINE_URL, ['absolute' => TRUE, ]);
+    $cancel_url  = url(UC_CONCORDPAY_CANCEL_URL, ['absolute' => TRUE, ]);
+
+    $cart_id = uc_cart_get_id();
+
+    $fields = array(
+        'operation'    => 'Purchase',
+        'merchant_id'  => variable_get('cp_merchant_id', ''),
+        'order_id'     => $order_id . concordpay::ORDER_SEPARATOR . time(),
+        'amount'       => $amount,
+        'currency_iso' => concordpay::CURRENCY_UAH,
+        'description'  => $description,
+        'add_params'   => [],
+        'approve_url'  => $approve_url,
+        'decline_url'  => $decline_url,
+        'cancel_url'   => $cancel_url,
+        'callback_url' => $base_url . '/' . UC_CONCORDPAY_RETURN_URL . "/?uc_cart_id=$cart_id",
+        // Statistics.
+        'client_last_name'  => $order->billing_last_name ?? '',
+        'client_first_name' => $order->billing_first_name ?? '',
+        'email'             => $order->primary_email ?? '',
+        'phone'             => $order->billing_phone ?? ''
+    );
+
+    $fields['signature'] = $concordpay->getRequestSignature($fields);
+
+    $redirect_form = uc_concordpay_redirect_form_generate($fields, concordpay::URL);
+
+    return $redirect_form;
+}
+
+
+/**
+ * Helper function for redirect form build.
+ *
+ * @param array $data
+ *   An array containing the fields for redirect form.
+ *
+ * @param string $url
+ *   Reserved param for future purposes.
+ *
+ * @return array $form
+ *   An array contaaning the form ready to submit.
+ */
+function uc_concordpay_redirect_form_generate($data, $url = '')
+{
+    $form['#action'] = concordpay::URL;
+    foreach ($data as $k => $v) {
+        if (!is_array($v)) {
+            $form[$k] = array(
+                '#type' => 'hidden',
+                '#value' => $v
+            );
+        } else {
+            $i = 0;
+            foreach ($v as $sk => $val) {
+                $form[$k . '[' . $sk . ']'] = array(
+                    '#type' => 'hidden',
+                    '#value' => $val
+                );
+            }
+        }
+    }
+
+    $form['actions'] = array('#type' => 'actions');
+
+    $form['actions']['submit'] = array(
+        '#type'  => 'submit',
+        '#value' => t('Pay via ConcordPay')
+    );
+
+    return $form;
+}
+
+/**
+ * Implements hook_init().
+ */
+function uc_concordpay_init() {
+  drupal_add_css(drupal_get_path('module', 'uc_concordpay') . '/uc_concordpay.css');
+}
+
+/**
+ * Implements hook_theme().
+ */
+function uc_concordpay_theme($existing, $type, $theme, $path) {
+  return array('uc_concordpay_payment_method_title' => array('variables' => array(),));
+}
+
+/**
+ * Returns HTML for payment method title
+ *
+ * @ingroup themeable
+ */
+function theme_uc_concordpay_payment_method_title() {
+  $path = base_path() . drupal_get_path('module', 'uc_concordpay') . '/images/concordpay.png';
+  $title = t('Payment Visa, Mastercard, Apple Pay, Google Pay');
+  $attr = array(
+    'path'       => $path,
+    'alt'        => 'ConcordPay Payment Gateway',
+    'attributes' => array('class' => 'concordpay-title-image')
+  );
+  $title .= '<br>';
+  $title .= theme_image($attr);
+
+  return $title;
+}

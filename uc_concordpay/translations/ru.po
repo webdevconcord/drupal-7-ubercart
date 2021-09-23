@@ -1,0 +1,175 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2021-09-22 16:37+0300\n"
+"PO-Revision-Date: 2021-09-22 16:38+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Poedit-KeywordsList: __;_e;translate;t\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-SearchPath-0: uc_concordpay.module\n"
+"X-Poedit-SearchPath-1: uc_concordpay.pages.inc\n"
+"X-Poedit-SearchPath-2: uc_concordpay.info\n"
+"X-Poedit-SearchPath-3: class/concordpay.php\n"
+
+#: uc_concordpay.module:48
+msgid "Successful payment"
+msgstr "Успешный платеж"
+
+#: uc_concordpay.module:56
+msgid "Unsuccessful payment"
+msgstr "Неуспешный платеж"
+
+#: uc_concordpay.module:64
+msgid "Canceled payment"
+msgstr "Отмененный платеж"
+
+#: uc_concordpay.module:81
+msgid "ConcordPay Payment Gateway"
+msgstr "ConcordPay - платежная система"
+
+#: uc_concordpay.module:83 uc_concordpay.module:269
+msgid "Payment Visa, Mastercard, Apple Pay, Google Pay"
+msgstr "Оплата Visa, Mastercard, Apple Pay, Google Pay"
+
+#: uc_concordpay.module:106
+msgid "Merchant ID"
+msgstr "Идентификатор продавца"
+
+#: uc_concordpay.module:107 uc_concordpay.module:115
+msgid "Given to Merchant by ConcordPay"
+msgstr "Выдаётся продавцу системой ConcordPay"
+
+#: uc_concordpay.module:114
+msgid "Secret key"
+msgstr "Секретный ключ"
+
+#: uc_concordpay.module:122
+msgid "Payment successful order status"
+msgstr "Статус заказа успешного платежа"
+
+#: uc_concordpay.module:124
+msgid "Order status after successful payment"
+msgstr "Статус заказа после успешного платежа"
+
+#: uc_concordpay.module:130
+msgid "Payment failed order status"
+msgstr "Статус заказа отмененного платежа"
+
+#: uc_concordpay.module:132
+msgid "Order status after failed payment"
+msgstr "Статус заказа после отмены платежа"
+
+#: uc_concordpay.module:138
+msgid "Payment refunded order status"
+msgstr "Статус заказа возвращенного платежа"
+
+#: uc_concordpay.module:140
+msgid "Order status after refund payment"
+msgstr "Статус заказа после возврата платежа"
+
+#: uc_concordpay.module:146
+msgid "Language"
+msgstr "Язык"
+
+#: uc_concordpay.module:148
+msgid "Choose language of payment page"
+msgstr "Выберите язык страницы оплаты"
+
+#: uc_concordpay.module:170
+msgid "Payment by card on the site"
+msgstr "Оплата картой на сайте"
+
+#: uc_concordpay.module:242
+msgid "Pay via ConcordPay"
+msgstr "Оплата через ConcordPay"
+
+#: uc_concordpay.pages.inc:41
+msgid "Error: Unknown operation type"
+msgstr "Ошибка: Неизвестный тип операции"
+
+#: uc_concordpay.pages.inc:48
+msgid "Error: This order has already been paid"
+msgstr "Ошибка: Этот заказ уже оплачен"
+
+#: uc_concordpay.pages.inc:55
+msgid "Payment made via ConcordPay"
+msgstr "Платеж совершен через ConcordPay"
+
+#: uc_concordpay.pages.inc:67
+msgid "Payment have been refunded through ConcordPay"
+msgstr "Платеж был возвращен через ConcordPay"
+
+#: uc_concordpay.pages.inc:69
+msgid "Payment refunded"
+msgstr "Платёж возвращён"
+
+#: uc_concordpay.pages.inc:74
+msgid "Payment declined"
+msgstr "Платеж отклонен"
+
+#: uc_concordpay.pages.inc:82
+msgid "Thank you, payment approved."
+msgstr "Спасибо, оплата одобрена."
+
+#: uc_concordpay.pages.inc:84
+msgid "Payment processed successfully."
+msgstr "Платеж успешно обработан."
+
+#: uc_concordpay.pages.inc:85 uc_concordpay.pages.inc:98
+#: uc_concordpay.pages.inc:111
+msgid "You can find a list of your orders in your personal account."
+msgstr "Список ваших заказов вы можете найти в личном кабинете."
+
+#: uc_concordpay.pages.inc:95
+msgid "Unfortunately payment declined."
+msgstr "К сожалению, платеж отклонен."
+
+#: uc_concordpay.pages.inc:97
+msgid "Payment processed fail."
+msgstr "Платеж отклонен."
+
+#: uc_concordpay.pages.inc:108
+msgid "Canceled payment."
+msgstr "Платеж отменен."
+
+#: uc_concordpay.pages.inc:110
+msgid "Cancellation of payment at the request of the buyer."
+msgstr "Отмена платежа по желанию покупателя."
+
+#: class/concordpay.php:121
+msgid "Error: Wrong payment signature"
+msgstr "Ошибка: Неверная подпись платежа"
+
+#, fuzzy
+#~| msgid "Pay via ConcordPay"
+#~ msgid "Payment have been passed ConcordPay"
+#~ msgstr "Оплата через ConcordPay"
+
+#~ msgid "Approve Url"
+#~ msgstr "URL успеха"
+
+#~ msgid "URL to redirect the user if payment is successful"
+#~ msgstr "URL перенаправления для успешного платежа"
+
+#~ msgid "Decline Url"
+#~ msgstr "URL отклонения"
+
+#~ msgid "URL to redirect the user if payment is unsuccessful"
+#~ msgstr "URL перенаправления для неудачного платежа"
+
+#~ msgid "Cancel Url"
+#~ msgstr "URL отказа от оплаты"
+
+#, fuzzy
+#~| msgid "URL for redirection in case the user refused to make the payment"
+#~ msgid "URL for redirection in case the user cancel to make the payment"
+#~ msgstr "URL перенаправления при отказе пользователя от оплаты"
